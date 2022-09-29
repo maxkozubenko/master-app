@@ -1,0 +1,15 @@
+[
+    {
+        "mainTitle": "Geometry",
+        "paragraphs": [
+            {
+                "title": "",
+                "parag": "Hexagons are 6-sided polygons. Regular hexagons have all the sides the same length. I'll assume all the hexagons we're working with here are regular. The typical orientations for hex grids are vertical columns (flat topped) and horizontal rows (pointy topped).Hexagons have 6 sides and 6 corners. Each side is shared by 2 hexagons. Each corner is shared by 3 hexagons. For more about centers, sides, and corners, see my article on grid parts (squares, hexagons, and triangles)."
+            },
+            {
+                "title": "Angles",
+                "parag": "In a regular hexagon the interior angles are 120°. There are six “wedges”, each an equilateral triangle with 60° angles inside. Each corner is size units away from the center. In code:function pointy_hex_corner(center, size, i):var angle_deg = 60 * i - 30°var angle_rad = PI / 180 * angle_degreturn Point(center.x + size * cos(angle_rad),center.y + size * sin(angle_rad))To fill a hexagon, gather the polygon vertices at hex_corner(…, 0) through hex_corner(…, 5). To draw a hexagon outline, use those vertices, and then draw a line back to hex_corner(…, 0).The difference between the two orientations is a rotation, and that causes the angles to change: flat topped angles are 0°, 60°, 120°, 180°, 240°, 300° and pointy topped angles are 30°, 90°, 150°, 210°, 270°, 330°. Note that the diagrams on this page use the y axis pointing down (angles increase clockwise); you may have to make some adjustments if your y axis points up (angles increase counterclockwise).In math, the "circumradius" is the distance from the center to a corner (I call this size); the "inradius" is the distance from the center to the middle of an edge. The "maximal diameter" is twice the circumradius; the "minimal diameter" is twice the inradius. Wikipedia has more."
+            }
+        ]
+    }
+]
