@@ -8,7 +8,130 @@
             },
             {
                 "title": "Angles",
-                "parag": "In a regular hexagon the interior angles are 120°. There are six “wedges”, each an equilateral triangle with 60° angles inside. Each corner is size units away from the center. In code:function pointy_hex_corner(center, size, i):var angle_deg = 60 * i - 30°var angle_rad = PI / 180 * angle_degreturn Point(center.x + size * cos(angle_rad),center.y + size * sin(angle_rad))To fill a hexagon, gather the polygon vertices at hex_corner(…, 0) through hex_corner(…, 5). To draw a hexagon outline, use those vertices, and then draw a line back to hex_corner(…, 0).The difference between the two orientations is a rotation, and that causes the angles to change: flat topped angles are 0°, 60°, 120°, 180°, 240°, 300° and pointy topped angles are 30°, 90°, 150°, 210°, 270°, 330°. Note that the diagrams on this page use the y axis pointing down (angles increase clockwise); you may have to make some adjustments if your y axis points up (angles increase counterclockwise).In math, the "circumradius" is the distance from the center to a corner (I call this size); the "inradius" is the distance from the center to the middle of an edge. The "maximal diameter" is twice the circumradius; the "minimal diameter" is twice the inradius. Wikipedia has more."
+                "parag": "In a regular hexagon the interior angles are 120°. There are six “wedges”, each an equilateral triangle with 60° angles inside. Each corner is size units away from the center. In code:function pointy_hex_corner(center, size, i):var angle_deg = 60 * i - 30°var angle_rad = PI / 180 * angle_degreturn Point(center.x + size * cos(angle_rad),center.y + size * sin(angle_rad))To fill a hexagon, gather the polygon vertices at hex_corner(…, 0) through hex_corner(…, 5). To draw a hexagon outline, use those vertices, and then draw a line back to hex_corner(…, 0).The difference between the two orientations is a rotation, and that causes the angles to change: flat topped angles are 0°, 60°, 120°, 180°, 240°, 300° and pointy topped angles are 30°, 90°, 150°, 210°, 270°, 330°. Note that the diagrams on this page use the y axis pointing down (angles increase clockwise); you may have to make some adjustments if your y axis points up (angles increase counterclockwise).In math, the circumradius is the distance from the center to a corner (I call this size); the inradius is the distance from the center to the middle of an edge. The maximal diameter is twice the circumradius; the minimal diameter is twice the inradius. Wikipedia has more."
+            },
+            {
+                "title": "Size and Spacing",
+                "parag": "Next we want to put several hexagons together. The size is the distance from the center to any corner. In the pointy orientation, a hexagon has width w = sqrt(3) * size and height h = 2 * size. The sqrt(3) comes from sin(60°).The horizontal distance between adjacent hexagon centers is w. The vertical distance between adjacent hexagon centers is h * 3/4.Some games use pixel art for hexagons that does not match an exactly regular polygon. The angles and spacing formulas I describe in this section won't match the sizes of your hexagons. The rest of the article, describing algorithms on hex grids, will work even if your hexagons are stretched or shrunk a bit, and I explain on the implementation page how to handle stretching."
+            }
+        ]
+    },
+    {
+        "mainTitle": "Coordinate Systems",
+        "paragraphs": [
+            {
+                "title": "",
+                "parag": "Now let's assemble hexagons into a grid. With square grids, there's one obvious way to do it. With hexagons, there are multiple approaches. I like cube coordinates for algorithms and axial or doubled for storage."
+            },
+            {
+                "title": "Offset coordinates",
+                "parag": "The most common approach is to offset every other column or row. Columns are named col (q). Rows are named row (r). You can either offset the odd or the even column/rows, so the horizontal and vertical hexagons each have two variants."
+            },
+            {
+                "title": "Cube coordinates",
+                "parag": "Another way to look at hexagonal grids is to see that there are three primary axes, unlike the two we have for square grids. There's an elegant symmetry with these. Let's take a cube grid and slice out a diagonal plane at x + y + z = 0. This is a weird idea but it helps us with hex grid algorithms: 3d cartesian coordinates follow standard vector operations: we can add/subtract coordinates, multiply/divide by a scalar, etc. We can reuse these operations with hexagonal grids. Offset coordinates do not support these operations.3d cartesian coordinates have existing algorithms like distances, rotation, reflection, line drawing, conversion to/from screen coordinates, etc. We can adapt these algorithms to work on hexagonal grids.Switch to hexagonsStudy how the cube coordinates work on the hex grid. Selecting the hexes will highlight the cube coordinates corresponding to the three axes.Each direction on the cube grid corresponds to a line on the hex grid. Try highlighting a hex with r at 0, 1, 2, 3 to see how these are related. The row is marked in blue. Try the same for q (green) and s (purple).Each direction on the hex grid is a combination of two directions on the cube grid. For example, northwest on the hex grid lies between the +s and -r, so every step northwest involves adding 1 to s and subtracting 1 from r. We'll use this property in the neighbors section.The cube coordinates are a reasonable choice for a hex grid coordinate system. The constraint is that q + r + s = 0 so the algorithms must preserve that. The constraint also ensures that there's a canonical coordinate for each hex."
+            },
+            {
+                "title": "Axial coordinates",
+                "parag": "The axial coordinate system, sometimes called “trapezoidal” or “oblique” or “skewed”, is the same as the cube system except we don't store the s coordinate. Since we have a constraint q + r + s = 0, we can calculate s = -q-r when we need it. The axial/cube system allows us to add, subtract, multiply, and divide with hex coordinates. The offset coordinate systems do not allow this, and that's part of what makes algorithms simpler with axial/cube coordinates."
+            },
+            {
+                "title": "Doubled coordinates",
+                "parag": "Although I recommend axial/cube coordinates, if you are sticking to offset coordinates, consider the doubled variant. It makes many of the algorithms easier to implement. Instead of alternation, the doubled coordinates double either the horizontal or vertical step size. It has a constraint (col + row) % 2 == 0. In the horizontal (pointy top hex) layout it increases the column by 2 each hex; in the vertical (flat top hex) layout it increases the row by 2 each hex. This allows the in-between values for the hexes that are halfway in between: I haven't found much information about this system — tri-bit.com called it interlaced, rot.js calls it double width, and this paper calls it rectangular. Other possible names: brick or checkerboard. I'm not sure what to call it. Tamás Kenéz sent me the core algorithms (neighbors, distances, etc.). If you have any references, please send them to me."
+            },
+            {
+                "title": "Others",
+                "parag": "In previous versions of this document, I used x z y for hexagonal coordinates and also for cartesian coordinates, and then I also used q r s for hexagonal coordinates. To avoid confusion in this document, I'll use the names q r s for hexagonal coordinates (with the constraint q + r + s = 0), and I'll use the names x y z for cartesian coordinates. There are many different valid cube hex coordinate systems. Some of them have constraints other than q + r + s = 0. I've shown only one of the many systems. There are also many different valid axial hex coordinate systems, found by using reflections and rotations. Some have the 120° axis separation as shown here and some have a 60° axis separation. There are also cube systems that use q-r, r-s, s-q. One of the interesting properties of that system is that it reveals hexagonal directions. There are spiral coordinate systems I haven't explored. See this question or this question on stackoverflow, or this paper about machine vision, or this diagram about generalized balanced ternary coordinates, or this math paper, or this discussion on reddit. They seem potentially useful for fixed sized hexagonal shaped maps."
+            }
+        ]
+    },
+    {
+        "mainTitle": "Coordinate conversion",
+        "paragraphs": [
+            {
+                "title": "",
+                "parag": "It is likely that you will use axial or offset coordinates in your project, but many algorithms are simpler to express in axial/cube coordinates. Therefore you need to be able to convert back and forth."
+            },
+            {
+                "title": "Axial coordinates",
+                "parag": "Axial and Cube coordinates are essentially the same. In the Cube system, we store the third coordinate, s. In the Axial system, we don't store it, but instead have to calculate it as needed, s = -q-r. function cube_to_axial(cube):var q = cube.qvar r = cube.rreturn Hex(q, r)function axial_to_cube(hex):var q = hex.qvar r = hex.rvar s = -q-rreturn Cube(q, r, s) Converting between the systems like this is probably overkill. If you're using Cube and need Axial, ignore the s coordinate. If you're using Axial and need Cube, calculate the s coordinate in the algorithms that need it."
+            },
+            {
+                "title": "Offset coordinates",
+                "parag": "Determine which type of offset system you use; *-r are pointy top; *-q are flat top. The conversion is different for each. function axial_to_oddr(hex): var col = hex.q + (hex.r - (hex.r&1)) / 2 var row = hex.r return OffsetCoord(col, row) function oddr_to_axial(hex): var q = hex.col - (hex.row - (hex.row&1)) / 2 var r = hex.row return Hex(q, r) Implementation note: I use a&1 (bitwise and) instead of a%2 (modulo) to detect whether something is even (0) or odd (1), because it works with negative numbers too. See a longer explanation on my implementation notes page."
+            },
+            {
+                "title": "Doubled coordinates",
+                "parag": "function doubleheight_to_axial(hex):var q = hex.colvar r = (hex.row - hex.col) / 2return Hex(q, r) function axial_to_doubleheight(hex):var col = hex.qvar row = 2 * hex.r + hex.qreturn DoubledCoord(col, row) function doublewidth_to_axial(hex):var q = (hex.col - hex.row) / 2var r = hex.rowreturn Hex(q, r) function axial_to_doublewidth(hex):var col = 2 * hex.q + hex.rvar row = hex.rreturn DoubledCoord(col, row)"
+            }
+        ]
+    },
+    {
+        "mainTitle": "Neighbors",
+        "paragraphs": [
+            {
+                "title": "",
+                "parag": "Given a hex, which 6 hexes are neighboring it? As you might expect, the answer is simplest with cube coordinates, still pretty simple with axial coordinates, and slightly trickier with offset coordinates. We might also want to calculate the 6 “diagonal” hexes.",
+                "code": ""
+            },
+            {
+                "title": "Cube coordinates",
+                "parag": "Moving one space in hex coordinates involves changing one of the 3 cube coordinates by +1 and changing another one by -1 (the sum must remain 0). There are 3 possible coordinates to change by +1, and 2 remaining that could be changed by -1. This results in 6 possible changes. Each corresponds to one of the hexagonal directions. The simplest and fastest approach is to precompute the permutations and put them into a table of Cube(dq, dr, ds): With the Cube coordinate systems, we can store differences between two coordinates (a vector), and then add those differences back to a coordinate to get another coordinate. That's what the cube_add function does. Axial and Doubled coordinates also support this, but the Offset coordinates do not.",
+                "code": "var cube_direction_vectors = [Cube(+1, 0, -1), Cube(+1, -1, 0), Cube(0, -1, +1), Cube(-1, 0, +1), Cube(-1, +1, 0), Cube(0, +1, -1), ] function cube_direction(direction):return cube_direction_vectors[direction] function cube_add(hex, vec):return Cube(hex.q + vec.q, hex.r + vec.r, hex.s + vec.s) function cube_neighbor(cube, direction):return cube_add(cube, cube_direction(direction))"
+            },
+            {
+                "title": "Axial coordinates",
+                "parag": "Since axial is the same as cube except not storing the third coordinate, the code is the same as the previous section except we won't write out the third coordinate:",
+                "code": " var axial_direction_vectors = [Hex(+1, 0), Hex(+1, -1), Hex(0, -1), Hex(-1, 0), Hex(-1, +1), Hex(0, +1), ] function axial_direction(direction):return axial_direction_vectors[direction] function axial_add(hex, vec):return Hex(hex.q + vec.q, hex.r + vec.r) function axial_neighbor(hex, direction):return axial_add(hex, axial_direction(direction))"
+            },
+            {
+                "title": "Offset coordinates",
+                "parag": "As with cube and axial coordinates, we'll build a table of the numbers we need to add to col and row. However offset coordinates can't be safely subtracted and added. For example, moving southeast from (0, 0) takes us to (0, +1), so we might put (0, +1) into the table for moving southeast. But moving southeast from (0, +1) takes us to (+1, +2), so we would need to put (+1, +1) into that table. The amount we need to add depends on where in the grid we are. Since the movement vector is different for odd and even columns/rows, we will need two separate lists of neighbors. Pick a grid type to see the corresponding code. Using the above lookup tables is the easiest way to to calculate neighbors. It's also possible to derive these numbers, for those of you who are curious.",
+                "code": "var oddr_direction_differences = [// even rows [[+1,  0], [ 0, -1], [-1, -1], [-1,  0], [-1, +1], [ 0, +1]],// odd rows [[+1,  0], [+1, -1], [ 0, -1], [-1,  0], [ 0, +1], [+1, +1]],]function oddr_offset_neighbor(hex, direction):var parity = hex.row & 1var diff = oddr_direction_differences[parity][direction]return OffsetCoord(hex.col + diff[0], hex.row + diff[1])"
+            },
+            {
+                "title": "Doubled coordinates",
+                "parag": "Unlike offset coordinates, the neighbors for doubled coordinates do not depend on which column/row we're on. They're the same everywhere, like axial/cube coordinates. Also unlike offset coordinates, we can safely subtract and add doubled coordinates, which makes them easier to work with than offset coordinates. ",
+                "code": ""
+            },
+            {
+                "title": "Diagonals",
+                "parag": "Moving to a “diagonal” space in hex coordinates changes one of the 3 cube coordinates by ±2 and the other two by ∓1 (the sum must remain 0).As before, you can convert these into axial by dropping one of the three coordinates, or convert to offset/doubled by precalculating the results.",
+                "code": "var cube_diagonal_vectors = [Cube(+2, -1, -1), Cube(+1, -2, +1), Cube(-1, -1, +2), Cube(-2, +1, +1), Cube(-1, +2, -1), Cube(+1, +1, -2), ] function cube_diagonal_neighbor(cube, direction):return cube_add(cube, cube_diagonal_vectors[direction])"
+            }
+        ]
+    },    
+    {
+        "mainTitle": "Distances",
+        "paragraphs": [
+            {
+                "title": "Cube coordinates",
+                "parag": "Since cube hexagonal coordinates are based on 3d cube coordinates, we can adapt the distance calculation to work on hexagonal grids. Each hexagon corresponds to a cube in 3d space. Adjacent hexagons are distance 1 apart in the hex grid but distance 2 apart in the cube grid. For every 2 steps in the cube grid, we need only 1 step in the hex grid. In the 3d cube grid, Manhattan distances are abs(dx) + abs(dy) + abs(dz). The distance on a hex grid is half that: An equivalent way to write this is by noting that one of the three coordinates must be the sum of the other two, then picking that one as the distance. You may prefer the “divide by two” form above, or the “max” form here, but they give the same result: The maximum of the three coordinates is the distance. You can also use the max of abs(vec.q-vec.r), abs(vec.r-vec.s), abs(vec.s-vec.q) to figure out which of the 6 “wedges” a hex is in; see diagrams here. Xiangguo Li's paper Storage and addressing scheme for practical hexagonal image processing. (DOI) gives a formula for Euclidean distance, which can be adapted to axial coordinates: sqrt(dq² + dr² + dq*dr).",
+                "code": "function cube_subtract(a, b):return Cube(a.q - b.q, a.r - b.r, a.s - b.s) function cube_distance(a, b):var vec = cube_subtract(a, b)return (abs(vec.q) + abs(vec.r) + abs(vec.s)) / 2// or: (abs(a.q - b.q) + abs(a.r - b.r) + abs(a.s - b.s)) / 2"
+            },
+            {
+                "title": "",
+                "parag": "",
+                "code": ""
+            },
+            {
+                "title": "",
+                "parag": "",
+                "code": ""
+            },
+            {
+                "title": "",
+                "parag": "",
+                "code": ""
+            }
+        ]
+    },
+    {
+        "mainTitle": "Line drawing",
+        "paragraphs": [
+            {
+                "title": "",
+                "parag": ""
             }
         ]
     }

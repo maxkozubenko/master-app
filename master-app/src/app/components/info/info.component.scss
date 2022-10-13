@@ -6,9 +6,55 @@
     border: 2px solid black;
     box-shadow: 0px 0px 72px 19px rgb(163 57 57);
     background-color: white;
+    border-radius: 15px;
+
+    @media screen and (max-width: 1300px) {
+        width: 900px;
+        padding: 15px;
+    }
+
+    @media screen and (max-width: 900px) {
+        width: 600px;
+        padding: 15px;
+    }
+
+    @media screen and (max-width: 700px) {
+        width: 500px;
+        padding: 15px;
+    }
+
+    @media screen and (max-width: 550px) {
+        width: 300px;
+        padding: 15px;
+    }
 }
 
 .info {
     min-height: 100vh;
     background-image: url(https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTRYNZ2OKylSJMn8PvTQTQd8wHuRQGWJtg4Jg&usqp=CAU);
+
+    .mainTitle {
+        font-size: 2.5rem;
+        background-image: url(https://media.istockphoto.com/vectors/abstract-red-light-hexagon-line-in-grey-modern-luxury-futuristic-vector-id1169152910?k=20&m=1169152910&s=612x612&w=0&h=FW2F5UPaDd4Vjsj9PAWEePtvZAUnGhcoq-jOwnAa2Yo=);
+        padding: 25px;
+        color: white;
+        background-position: center;
+        box-shadow: 0px 0px 30px 10px rgb(163 57 57);
+        border-radius: 10px;
+    }
+
+    .title {
+        font-size: 2rem;
+        padding: 30px;
+        color: white;
+        background-image: url(https://media.istockphoto.com/vectors/dark-blue-technology-hexagonal-background-vector-id1320467133?k=20&m=1320467133&s=612x612&w=0&h=SGIcbRaqUoav3cP5OBuiE9VPseRHoInP7EMNhgJDI6w=);
+        background-position: center;
+        border-radius: 10px;
+    }
+
+    .parag {
+        font-size: 1.1rem;
+        line-height: 1.4;
+        text-align: justify;
+    }
 }

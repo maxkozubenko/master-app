@@ -6,7 +6,7 @@ import { MainComponent } from './components/main/main.component';
 
 const routes: Routes = [
   { path: 'grid', component: HexogonalComponent },
-  { path: 'info', component: InfoComponent },
+  { path: 'info/:id', component: InfoComponent },
   { path: '', component: MainComponent },
   { path: '', redirectTo: '/', pathMatch: 'full' },
 ];
